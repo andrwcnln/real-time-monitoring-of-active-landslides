@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <!-- setting the page title and favicon, and importing the Bulma css -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Real Time Monitoring of Active Landslides</title>
+    <link rel="icon" href="/static/images/strath_engineering.jpg">
+    <link href="https://use.fontawesome.com/releases/v5.0.2/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+
+    <!-- This ensures that the background image is displayed properly -->
+    <style>
+        .bg-img {
+            background-image: url(/static/images/rest_and_be_thankful.jpg);
+            background-size: cover;
+        }
+
+        .full-height {
+            height: 100vh;
+            overflow-y: auto;
+        }
+    </style>
+
+</head>
+
+<body class="bg-img">
+    <div class="full-height">
+        <div class="column is-half is-offset-one-quarter">
+            <div class="box">
+                <div class="columns is-vcentered">
+                    <!-- title and logo --> 
+                    <div class="column is-2 is-left">
+                        <img src="/static/images/strath_engineering.jpg" width="100" height="100">
+                    </div>
+                    <div class="column">
+                        <h1 class="title is-3">Real Time Monitoring of Active Landslides</h1>
+                    </div>
+                </div>
+                <!-- plot button -->
+                <h4 class="title is-5">View incoming data:</h4>
+                <div class="buttons">
+                    <a class="button is-warning" id="plot" href="/plot">
+                        <span class="icon">
+                            <i class="fas fa-chart-line"></i>
+                        </span>
+                        <span>Live plot</span>
+                    </a>
+                </div>
+                <h4 class="title is-5">Or, select data to view and download:</h4>
+                <!-- data selection form --> 
+                <form name="data_form" method="post" target="_blank">
+                    <div class="">
+                        <div class="box">
+                            <div class="block">
+                                <!-- select time ranges --> 
+                                <p>Range:</p>
+                                <div class="select">
+                                    <!-- javascript date_display() is called when the selection is changed or clicked on --> 
+                                    <select id="time_range" name="time_range" onchange="date_display()" onclick="date_display()">
+                                        <option selected>New data since last downloaded</option>
+                                        <option>Last minute</option>
+                                        <option>Last 10 minutes</option>
+                                        <option>Last 30 minutes</option>
+                                        <option>Specify dates and times</option>
+                                        <option>All data</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- last downloaded date, passed from Flask app and formatted with Jinja2 --> 
+                            <div class="block" id="last_downloaded">
+                                <p>Last downloaded on {{date}}</p>
+                            </div>
+
+                            <!-- date selections, hidden or displayed by javascript date_display() --> 
+                            <div class="block" id="date_selector" style="display:none;">
+                                <div class="column">
+                                    <p>From:</p>
+                                    <input type="datetime-local" id="from" name="from" disabled></input>
+                                </div>
+                                <div class="column">
+                                    <p>To:</p>
+                                    <input type="datetime-local" id="to" name="to" disabled></input>
+                                </div>
+                            </div>
+
+                            <!-- all directions checkbox --> 
+                            <div class="block">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="all" name="all" onclick="check_uncheck_all()" checked> <!-- javascript check_uncheck_all() is called when this is clicked --> 
+                                    All directions?
+                                </label>
+                            </div>
+
+                            <!-- geophone checkboxes --> 
+                            <div class="box">
+                                <div class="columns">
+                                    <div class="column">
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="geophone x" id="geophone" checked disabled>
+                                            Geophone X
+                                        </label>
+                                    </div>
+
+                                    <div class="column">
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="geophone y" id="geophone" checked disabled>
+                                            Geophone Y
+                                        </label>
+                                    </div>
+
+                                    <div class="column">
+                                        <label class="checkbox">
+                                            <input type="checkbox" name="geophone z" id="geophone" checked disabled>
+                                            Geophone Z
+                                        </label>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                            <!-- timestamps checkbox --> 
+                            <div class="block">
+                                <label class="checkbox">
+                                    <input type="checkbox" id="time_stamps" name="time_stamps" checked>
+                                    Include time stamps?
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <br>
+
+                    <!-- form submission buttons --> 
+                    <div class="block">
+                        <div class="buttons">
+                            <button class="button is-primary" type="submit" value="Submit" onclick="return download()"> <!-- returns value of javascript download() when clicked --> 
+                                <span class="icon">
+                                    <i class="fas fa-download"></i>
+                                </span>
+                                <span>Download</span>
+                            </button>
+
+
+
+                            <button class="button is-link" type="submit" value="Submit" onclick="return view()"> <!-- returns value of javascript view() when clicked -->
+                                <span class="icon">
+                                    <i class="fas fa-eye"></i>
+                                </span>
+                                <span>View</span>
+                            </button>
+
+
+                            <button class="button is-danger" id="reset" type="reset" value="Reset" onclick="reset_form()"> <!-- calls javascript reset_form() when clicked -->
+                                <span class="icon">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                <span>Reset form</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- background photo credit --> -->
+                    <div style="font-weight:bold; text-align:center;">
+                        Photo by <a
+                            href="https://unsplash.com/@iancylkowskiphotography?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Ian
+                            Cylkowski</a> on <a
+                            href="https://unsplash.com/s/photos/rest-and-be-thankful?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Unsplash</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
+
+    <script>
+        // this function is called when the all diections checkbox is clicked
+        function check_uncheck_all() {
+            // initalise variables: checkBox is all directions checkbox, cbs are the geophone checkboxes
+            var checkBox = document.getElementById("all");
+            const cbs = document.querySelectorAll('input[id="geophone"]');
+
+            // if all directions is checked, set all geophone directions to true and disable the checkboxes
+            // otherwise, enable them
+            if (checkBox.checked == true) {
+                cbs.forEach((cb) => {
+                    cb.checked = true;
+                    cb.disabled = "disabled";
+                });
+            } else {
+                cbs.forEach((cb) => {
+                    cb.disabled = "";
+                });
+            }
+        }
+
+        // this function is called when the reset form button is clicked
+        function reset_form() {
+            // initialise variables
+            const cbs = document.querySelectorAll('input[type="checkbox"]');
+            const geophone_cbs = document.querySelectorAll('input[id="geophone"]');
+            var drop_down = document.getElementById('time_range');
+            var date_selector = document.getElementById('date_selector');
+
+            // set all checkboxes to true
+            cbs.forEach((cb) => {
+                cb.checked = true;
+            });
+
+            // set geophone directions to be disabled
+            geophone_cbs.forEach((cb) => {
+                cb.disabled = "disabled";
+            });
+
+            // reset the dropdown and call the date display function to show the last downloaded date
+            drop_down.selectedIndex = 0;
+            date_display();
+
+            date_selector.style.display = "none"; // hide the date selectors
+        }
+
+        // this function is called when the dropdown is changed
+        function date_display() {
+            // initialise variables
+            var from = document.getElementById('from');
+            var to = document.getElementById('to');
+            var drop_down = document.getElementById('time_range');
+            var date_selector = document.getElementById('date_selector');
+            var download_date = document.getElementById('last_downloaded');
+
+            if (drop_down.selectedIndex == 4) { // if 'Specify dates and times is selected' then show date selectors and enable them
+                date_selector.style.display = "block";
+                from.disabled = "";
+                to.disabled = "";
+                window.dates_visible = true;
+                download_date.style.display = "none";
+            } else if (drop_down.selectedIndex == 0) { // is 'New data since last downloaded' is selected then show last downloaded date and hide date selectors
+                download_date.style.display = "block";
+                date_selector.style.display = "none";
+                from.disabled = "disabled";
+                to.disabled = "disabled";
+                window.dates_visible = false;
+            } else { // otherwse hide and disable both
+                date_selector.style.display = "none";
+                from.disabled = "disabled";
+                to.disabled = "disabled";
+                window.dates_visible = false;
+                download_date.style.display = "none";
+            }
+
+        }
+
+        // this function is called when the download button is clicked
+        function download() {
+            // initialise variables
+            var dates_valid = true;
+
+            // if dates have been selected manually, call date_check function to see if they are valid
+            if (window.dates_visible == true) {
+                dates_valid = date_check(document.data_form.from.value, document.data_form.to.value);
+            }
+
+            // if they are valid, display a confirmation dialogue. if OK is selected then return true to the html so the form is submitted. otherwise don't.
+            if (dates_valid == true) {
+                if (!confirm_form()){
+                    return false;
+                } else {
+                    document.data_form.action = "{{ url_for('download') }}"; // submit form to /download
+                    return true;
+                }
+            } else { // if dates are invalid then tell user and return false so that the form is not submitted
+                alert("Dates are invalid. Please make sure you have specified a time and that the 'To:' value falls after the 'From:' value.")
+                return false;
+            }
+        }
+
+        // this function is called when the download button is clicked
+        function view() {
+            // initialise variables
+            var dates_valid = true;
+            
+            // if dates have been selected manually, call date_check function to see if they are valid
+            if (window.dates_visible == true) {
+                dates_valid = date_check(document.data_form.from.value, document.data_form.to.value);
+            }
+
+            // if they are valid, display a confirmation dialogue. if OK is selected then return true to the html so the form is submitted. otherwise don't.
+            if (dates_valid == true) {
+                if (!confirm_form()){
+                    return false;
+                } else {
+                    document.data_form.action = "{{ url_for('view') }}"; // submit form to /view
+                    return true;
+                }
+            } else { // if dates are invalid then tell user and return false so that the form is not submitted
+                alert("Dates are invalid. Please make sure you have specified a time and that the 'To:' value falls after the 'From:' value.")
+                return false;
+            }
+        }
+
+
+        // this fucntion is called by view() and download(), and checks whether the 'from' date is before the 'to' date
+        function date_check(from, to) {
+            var valid = false;
+
+            if (Date.parse(from) < Date.parse(to)) {
+                valid = true;
+            } else {
+                valid = false;
+            }
+            return valid
+        }
+
+        // this function is called by view() and download, and returns the aboutput of the confirmation message
+        function confirm_form() {
+            return confirm("This operation may take a while to complete, especially with time ranges > 10 minutes. If the operation does not appear to have started, please check that pop-ups are not blocked for this site.")
+        }
+
+    </script>
+
+</body>
+
+</html>

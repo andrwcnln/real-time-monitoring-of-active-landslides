@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <!-- setting the page title and favicon, and importing the Bulma css -->
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{page_title}}</title>
+    <link rel="icon" href="/static/images/strath_engineering.jpg">
+    <link href="https://use.fontawesome.com/releases/v5.0.2/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+
+    <!-- This ensures that the background image is displayed properly -->
+    <style>
+        .bg-img {
+            background-image: url(/static/images/rest_and_be_thankful.jpg);
+            background-size: cover;
+        }
+
+        .full-height {
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-img">
+    <div class="full-height">
+        <!-- new tab message -->
+        <div class="column is-4 is-offset-4">
+            <div class="box">
+                <div class="block has-text-centered">
+                    <p>This page has opened in a new tab.</p>
+                </div>
+            </div>
+        </div>
+        <!-- table of data -->
+        <div class="column is-10 is-offset-1">
+            <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+                <!-- table headers based upon sensor_dict by Jinja2 -->
+                <thead>
+                    <tr>
+                        {% if sensor_dict['time'] %}
+                        <th>Time</th>
+                        {% endif %}
+                        {% if sensor_dict['geophone x'] %}
+                        <th>Geophone X</th>
+                        {% endif %}
+                        {% if sensor_dict['geophone y'] %}
+                        <th>Geophone Y</th>
+                        {% endif %}
+                        {% if sensor_dict['geophone z'] %}
+                        <th>Geophone Z</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- data based from python using Jinja2 -->
+                    {% for readings in data %}
+                    <tr>
+                        {% if sensor_dict['time'] %}
+                        <td>{{readings['time']}}</td>
+                        {% endif %}
+                        {% if sensor_dict['geophone x'] %}
+                        <td>{{readings['geophone x']}}</td>
+                        {% endif %}
+                        {% if sensor_dict['geophone y'] %}
+                        <td>{{readings['geophone y']}}</td>
+                        {% endif %}
+                        {% if sensor_dict['geophone z'] %}
+                        <td>{{readings['geophone z']}}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <!-- table footers based upon sensor_dict by Jinja2 -->
+                <tfoot>
+                    <tr>
+                        {% if sensor_dict['time'] %}
+                        <th>Time</th>
+                        {% endif %}
+                        {% if sensor_dict['geophone x'] %}
+                        <th>Geophone X</th>
+                        {% endif %}
+                        {% if sensor_dict['geophone y'] %}
+                        <th>Geophone Y</th>
+                        {% endif %}
+                        {% if sensor_dict['geophone z'] %}
+                        <th>Geophone Z</th>
+                        {% endif %}
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+</body>
+
+</html>

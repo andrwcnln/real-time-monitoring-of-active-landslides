@@ -1,0 +1,11 @@
+requests
+glob
+pandas
+serial
+logging
+datetime
+csv
+RPi.GPIO
+
+# the following requirements are specific to the ADC and will need to be downloaded from https://www.waveshare.com/wiki/High-Precision_AD_HAT and not via pip install
+# High_Pricision_AD_HAT

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <!-- setting the page title and favicon, and importing the Bulma css -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Live Plots</title>
+    <link rel="icon" href="/static/images/strath_engineering.jpg">
+    <link href="https://use.fontawesome.com/releases/v5.0.2/css/all.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+
+    <!-- This ensures that the background image is displayed properly -->
+    <style>
+        .bg-img {
+            background-image: url(/static/images/rest_and_be_thankful.jpg);
+            background-size: cover;
+        }
+
+        .full-height {
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-img">
+    <div class="full-height">
+
+        <div class="block">
+        </div>
+
+        <div class="column is-10 is-offset-1">
+            <div class="box">
+                <div class="columns centered">
+                    <div class="column is-3">
+                        <div class="buttons">
+                            <!-- home button -->
+                            <a class="button is-info" id="home"  href="/">
+                                <span class="icon">
+                                    <i class="fas fa-arrow-left"></i>
+                                </span>
+                                <span>Home</span>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- countdown timer -->
+                    <div class="column is-6">
+                        <div class="block has-text-centered">
+                            <p class="title is-4" id="display">Checking for new data in 5 seconds</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- the plots themselves -->
+                <div class="columns">
+                    <div class="column is-six has-text-centered">
+                        <img src="/static/images/plot.png" id="plot">
+                    </div>
+                    <div class="column is-six has-text-centered">
+                        <img src="/static/images/fourier.png" id="fourier">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>
+
+<script>
+    window.counter = 5 // initialises global counter variable to 5
+
+    // this function forces the plots to be updated by appending the current time to the image sources
+    function update_plots() {
+        // initialise variables
+        var plot_address;
+        var fourier_address;
+        var plot = document.getElementById("plot");
+        var fourier = document.getElementById("fourier");
+
+        // checks if the plot source contains a ?. this is to remove the attached time so that the plot can be reloaded
+        if (plot.src.indexOf('?') > -1)
+            plot_address = plot.src.split('?')[0]; // if it does it removes the ? and everything after it and sets plot address to this value
+        else
+            plot_address = plot.src; // otherwise just sets plot address to the source
+
+        // same for the fourier source        
+        if (fourier.src.indexOf('?') > -1)
+            fourier_address = fourier.src.split('?')[0];
+        else
+            fourier_address = fourier.src;
+
+        // it then updates the source and appends teh time after a question mark. this is to make sure the plot is reloaded
+        plot.src = plot_address + "?time=" + new Date().getTime(); 
+        fourier.src = fourier_address + "?time=" + new Date().getTime();
+        window.counter = 5; // resets counte to 5
+    }
+
+    var interval_1 = setInterval(update_plots, 5000); // this calls the above function every 5000ms
+
+    // this function is called ever second to update the visible countdown to new data being loaded
+    function countdown() {
+        var display = document.getElementById("display");
+        window.counter = window.counter - 1;
+        display.innerText = "Checking for new data in " + window.counter + " seconds"
+    }
+
+    var interval_2 = setInterval(countdown, 1000); // call countdown() every 1000ms
+</script>
